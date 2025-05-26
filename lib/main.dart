@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gun_draw_trainer/assets/styles.dart';
+import 'package:gun_draw_trainer/controllers/alert_player.dart';
+import 'package:gun_draw_trainer/res/styles.dart';
 import 'package:gun_draw_trainer/components/header.dart';
 import 'package:gun_draw_trainer/pages/timer_page.dart';
 
@@ -13,6 +14,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
+    AlertPlayer.initializePlayer();
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -20,7 +24,16 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: "Roboto"
       ),
-      home: const MyHomePage(title: 'Gun Draw Practice'),
+      home: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF212529), Color(0xFF495057)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: const MyHomePage(title: 'Gun Draw Practice'),
+      ),
     );
   }
 }

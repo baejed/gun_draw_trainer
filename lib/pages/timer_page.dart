@@ -1,8 +1,9 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:gun_draw_trainer/assets/styles.dart';
-
+import 'package:gun_draw_trainer/controllers/alert_player.dart';
+import 'package:gun_draw_trainer/res/styles.dart';
 
 class TimerPage extends StatefulWidget {
 
@@ -22,8 +23,9 @@ class _TimerPageState extends State<TimerPage> {
   int seconds = 0;
   int ms = 0;
   bool starting = false;
+  bool readyToStart = false;
 
-  void start() {
+  Future<void> startTimer() async {
     stopwatch.start();
     setState(() {
       starting = true;
@@ -37,7 +39,19 @@ class _TimerPageState extends State<TimerPage> {
     });
   }
 
+  void start() {
+
+    int randomMs = 1500 + Random().nextInt(1500);
+
+    Future.delayed(Duration(milliseconds: randomMs), () async {
+      await AlertPlayer.play();
+      startTimer();
+    });
+
+  }
+
   void stop() {
+    AlertPlayer.initializePlayer();
     stopwatch.stop();
     stopwatch.reset();
     timer!.cancel();
@@ -58,13 +72,25 @@ class _TimerPageState extends State<TimerPage> {
         child: Stack(
           children: [
             Center(
-              child: Row(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text("$seconds.", style: Styles.txtTime),
-                  Text("${ms < 10 ? "0$ms" : ms}", style: Styles.txtTimeMs),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text("$seconds.", style: Styles.txtTime),
+                      Text("${ms < 10 ? "0$ms" : ms}", style: Styles.txtTimeMs),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(onPressed: () {}, icon: Icon(Icons.refresh), color: Colors.white,),
+                      IconButton(onPressed: () {}, icon: Icon(Icons.delete), color: Colors.red[600]),
+                    ],
+                  )
                 ],
               )
             ),
