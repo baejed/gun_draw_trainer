@@ -24,12 +24,13 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: "Roboto"
       ),
+      debugShowCheckedModeBanner: false,
       home: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF212529), Color(0xFF495057)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [Color(0xFF6C757D), Color(0xFF212529)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: const MyHomePage(title: 'Gun Draw Practice'),
@@ -52,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: GunDrawTrainerHeader(title: Text(widget.title, style: Styles.txtHeading)),

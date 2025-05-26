@@ -19,11 +19,16 @@ class _TimerPageState extends State<TimerPage> {
   Stopwatch stopwatch = Stopwatch();
   double time = 0;
   Duration duration = Duration();
-  Timer? timer;
+  Timer? timer; // this is the stopwatch timer
+  Timer? holdTimer;
   int seconds = 0;
   int ms = 0;
   bool starting = false;
+
   bool readyToStart = false;
+  bool holding = false;
+  bool goStart = true;
+  bool getReady = false;
 
   Future<void> startTimer() async {
     stopwatch.start();
@@ -42,22 +47,69 @@ class _TimerPageState extends State<TimerPage> {
   void start() {
 
     int randomMs = 1500 + Random().nextInt(1500);
+    setState(() => getReady = true);
 
     Future.delayed(Duration(milliseconds: randomMs), () async {
       await AlertPlayer.play();
+      setState(() => getReady = false);
       startTimer();
     });
 
   }
 
   void stop() {
-    AlertPlayer.initializePlayer();
+
+    if(starting) {
+      AlertPlayer.initializePlayer();
+    }
+
     stopwatch.stop();
     stopwatch.reset();
-    timer!.cancel();
+    timer?.cancel();
 
     setState(() {
       starting = false;
+    });
+  }
+
+  void restart() {
+    stop();
+
+    setState(() {
+      ms = 0;
+      seconds = 0;
+    });
+  }
+
+  void onHold() {
+
+    int holdTime = 1; // the time needed to hold to start the timer (seconds)
+
+    setState(() {
+      holding = true;
+      readyToStart= false;
+    });
+
+    holdTimer = Timer(Duration(seconds: holdTime), () {
+      setState(() {
+        readyToStart = true;
+      });
+    });
+  }
+
+  void onTapUp() {
+
+    holdTimer?.cancel();
+
+    if(!starting && readyToStart) {
+      start();
+    }else {
+      stop();
+    }
+
+    setState(() {
+      holding = false;
+      readyToStart = false;
     });
   }
   
@@ -67,8 +119,8 @@ class _TimerPageState extends State<TimerPage> {
     return (
       GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapDown: (details) => print("holding"),
-        onTapUp: (details) => starting ? stop() : start(),
+        onTapDown: (details) => onHold(),
+        onTapUp: (details) => onTapUp(),
         child: Stack(
           children: [
             Center(
@@ -80,15 +132,29 @@ class _TimerPageState extends State<TimerPage> {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text("$seconds.", style: Styles.txtTime),
-                      Text("${ms < 10 ? "0$ms" : ms}", style: Styles.txtTimeMs),
+                      Text(
+                        getReady ? "Ready..." :"$seconds.",
+                        style: holding 
+                          ? readyToStart
+                            ? Styles.txtTimeGreen 
+                            : Styles.txtTimeDarker
+                          : Styles.txtTime,
+                      ),
+                      Text(
+                        getReady ? "" : "${ms < 10 ? "0$ms" : ms}", 
+                        style: holding 
+                          ? readyToStart 
+                            ? Styles.txtTimeMsGreen
+                            : Styles.txtTimeMsDarker
+                          : Styles.txtTimeMs
+                      ),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(onPressed: () {}, icon: Icon(Icons.refresh), color: Colors.white,),
-                      IconButton(onPressed: () {}, icon: Icon(Icons.delete), color: Colors.red[600]),
+                      IconButton(onPressed: restart, icon: Icon(Icons.refresh), color: Colors.white,),
+                      IconButton(onPressed: () {}, icon: Icon(Icons.delete), color: Colors.white),
                     ],
                   )
                 ],
